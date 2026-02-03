@@ -7,15 +7,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-  SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-  SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-  SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,33 +28,13 @@ jobs:
         run: pip install snowflake-cli
 
       - name: Deploy Database Setup
-        run: |
-          snow sql -f sql/01_setup_database.sql \
-            --account $SNOWFLAKE_ACCOUNT \
-            --user $SNOWFLAKE_USER \
-            --password $SNOWFLAKE_PASSWORD \
-            --warehouse $SNOWFLAKE_WAREHOUSE
+        run: snow sql -f sql/01_setup_database.sql
 
       - name: Deploy Stored Procedures
-        run: |
-          snow sql -f sql/02_stored_procedures.sql \
-            --account $SNOWFLAKE_ACCOUNT \
-            --user $SNOWFLAKE_USER \
-            --password $SNOWFLAKE_PASSWORD \
-            --warehouse $SNOWFLAKE_WAREHOUSE
+        run: snow sql -f sql/02_stored_procedures.sql
 
       - name: Deploy Tasks
-        run: |
-          snow sql -f sql/03_tasks.sql \
-            --account $SNOWFLAKE_ACCOUNT \
-            --user $SNOWFLAKE_USER \
-            --password $SNOWFLAKE_PASSWORD \
-            --warehouse $SNOWFLAKE_WAREHOUSE
+        run: snow sql -f sql/03_tasks.sql
 
       - name: Verify Deployment
-        run: |
-          snow sql -q "SELECT TABLE_NAME FROM CICD.INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'ETL'" \
-            --account $SNOWFLAKE_ACCOUNT \
-            --user $SNOWFLAKE_USER \
-            --password $SNOWFLAKE_PASSWORD \
-            --warehouse $SNOWFLAKE_WAREHOUSE
+        run: snow sql -q "SELECT TABLE_NAME FROM CICD.INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'ETL'"
