@@ -25,11 +25,14 @@ jobs:
       - name: Configure Snowflake CLI
         run: |
           mkdir -p ~/.snowflake
+          echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > ~/.snowflake/rsa_key.p8
+          chmod 0600 ~/.snowflake/rsa_key.p8
           cat > ~/.snowflake/config.toml << EOF
           [connections.default]
           account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
           user = "${{ secrets.SNOWFLAKE_USER }}"
-          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          authenticator = "SNOWFLAKE_JWT"
+          private_key_file = "~/.snowflake/rsa_key.p8"
           warehouse = "${{ secrets.SNOWFLAKE_WAREHOUSE }}"
           EOF
           chmod 0600 ~/.snowflake/config.toml
