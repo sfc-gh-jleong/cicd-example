@@ -32,6 +32,7 @@ jobs:
           password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
           warehouse = "${{ secrets.SNOWFLAKE_WAREHOUSE }}"
           EOF
+          chmod 0600 ~/.snowflake/config.toml
 
       - name: Deploy Database Setup
         run: snow sql -f sql/01_setup_database.sql
